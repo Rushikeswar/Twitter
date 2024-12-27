@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Trends</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #loading { font-size: 18px; color: blue; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Twitter Trends Scraper</h1>
+    <button id="runScraper">Run Scraper</button>
+    <div id="loading" style="display:none;">Loading...</div>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('runScraper').addEventListener('click', async () => {
+            const loadingDiv = document.getElementById('loading');
+            const resultsDiv = document.getElementById('results');
+            loadingDiv.style.display = 'block';
+            resultsDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/run-scraper');
+                if (!response.ok) throw new Error('Failed to fetch data');
+
+                const result = await response.json();
+                const { data } = result;
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <h2>These are the most happening topics as on ${new Date(data.timestamp).toLocaleString()}</h2>
+                        <ul>
+                            ${data.trends.map(trend => `<li>${trend}</li>`).join('')}
+                        </ul>
+                        <p>The IP address used for this query was ${data.ipAddress}.</p>
+                        <h3>JSON Extract:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<p>Error fetching trends. Please try again later.</p>';
+                console.error(error);
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
