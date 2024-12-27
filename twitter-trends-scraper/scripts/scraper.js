@@ -13,7 +13,9 @@ async function fetchTrends() {
 
     const options = new chrome.Options();
     options.addArguments('--headless', '--disable-gpu'); // Added disable-gpu for better performance
-    
+    const chromePath = process.env.CHROME_BIN || '/usr/bin/google-chrome';
+    options.setChromeBinaryPath(chromePath);
+
     const driver = await new Builder()
         .forBrowser('chrome')
         .setProxy(proxy.manual({
