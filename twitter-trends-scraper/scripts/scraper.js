@@ -2,6 +2,8 @@ const { Builder, By, Key, until } = require('selenium-webdriver');
 const proxy = require('selenium-webdriver/proxy');
 const chrome = require('selenium-webdriver/chrome');
 const axios = require('axios');
+const path = require('path');
+const chromePath = process.env.CHROME_PATH || '/usr/bin/google-chrome';
 require('dotenv').config();
 
 async function fetchTrends() {
@@ -17,13 +19,14 @@ async function fetchTrends() {
 
     // Chrome options for headless mode and optimized performance
     const options = new chrome.Options();
+    options.setChromeBinaryPath(process.env.CHROME_BINARY_PATH);
     options.addArguments(
         '--headless', 
         '--disable-gpu', 
         '--no-sandbox', 
         '--disable-dev-shm-usage'
     );
-    
+    options.setChromeBinaryPath(chromePath);
     // Build the WebDriver with proxy configuration
     const driver = await new Builder()
         .forBrowser('chrome')

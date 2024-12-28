@@ -30,6 +30,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Serve Static Files
 app.use(express.static(path.join(__dirname, 'views')));
 
+
 // Scraper Route
 app.get('/run-scraper', async (req, res) => {
     try {

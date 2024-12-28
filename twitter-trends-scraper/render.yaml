@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: twitter-trends-scraper
+    env: node
+    buildCommand: ./render-build.sh && npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: CHROME_BINARY_PATH
+        value: /usr/bin/google-chrome
+      - key: MONGODB_URI
+        value: mongodb+srv://rushikesward:Rushi%409908@cluster0.5ss0t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - key: PORT
+        value: 3000
+      - key: TWITTER_USERNAME
+        value: rushikesward
+      - key: TWITTER_PASSWORD
+        value: Rushi@9908
+      - key: PROXYMESH_URL
+        value: "http://rushikeswar:Rushi%409908@world.proxymesh.com:31280,http://rushikeswar:Rushi%409908@usisp.proxymesh.com:31280,http://rushikeswar:Rushi%409908@open.proxymesh.com:31280,http://rushikeswar:Rushi%409908@in.proxymesh.com:31280,http://rushikeswar:Rushi%409908@us-fl.proxymesh.com:31280,http://rushikeswar:Rushi%409908@ch.proxymesh.com:31280,http://rushikeswar:Rushi%409908@uk.proxymesh.com:31280,http://rushikeswar:Rushi%409908@us-ny.proxymesh.com:31280,http://rushikeswar:Rushi%409908@us-dc.proxymesh.com:31280,http://rushikeswar:Rushi%409908@us-ca.proxymesh.com:31280"
