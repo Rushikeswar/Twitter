@@ -9,7 +9,6 @@ const {
     TWITTER_USERNAME,
     TWITTER_PASSWORD,
     PROXYMESH_URL,
-    CHROME_PATH = '/usr/bin/google-chrome',
 } = process.env;
 
 if (!TWITTER_USERNAME || !TWITTER_PASSWORD) {
@@ -36,7 +35,10 @@ async function fetchTrends() {
 
     // Configure Chrome options for headless mode
     const options = new chrome.Options();
-    options.setChromeBinaryPath(process.env.CHROME_BINARY_PATH || '/usr/bin/google-chrome');
+// Set the correct path for Chrome on Render
+options.setChromeBinaryPath(process.env.CHROME_PATH || '/usr/bin/google-chrome-stable');
+
+
     options.addArguments(
         '--headless',
         '--disable-gpu',
