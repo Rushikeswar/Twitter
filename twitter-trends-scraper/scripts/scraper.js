@@ -2,53 +2,73 @@ const { Builder, By, Key, until } = require('selenium-webdriver');
 const proxy = require('selenium-webdriver/proxy');
 const chrome = require('selenium-webdriver/chrome');
 const axios = require('axios');
-const path = require('path');
-const chromePath = process.env.CHROME_PATH || '/usr/bin/google-chrome';
 require('dotenv').config();
 
+// Ensure required environment variables are present
+const {
+    TWITTER_USERNAME,
+    TWITTER_PASSWORD,
+    PROXYMESH_URL,
+    CHROME_PATH = '/usr/bin/google-chrome',
+} = process.env;
+
+if (!TWITTER_USERNAME || !TWITTER_PASSWORD) {
+    console.error('TWITTER_USERNAME and TWITTER_PASSWORD environment variables are required.');
+    process.exit(1);
+}
+
+if (!PROXYMESH_URL) {
+    console.error('PROXYMESH_URL environment variable is required.');
+    process.exit(1);
+}
+
+// Function to fetch Twitter trends
 async function fetchTrends() {
-    // Get the list of proxies from the environment variable
-    const proxyUrls = process.env.PROXYMESH_URL ? process.env.PROXYMESH_URL.split(',') : [];
+    // Split proxy URLs from the environment variable
+    const proxyUrls = PROXYMESH_URL.split(',').map((url) => url.trim());
     if (!proxyUrls.length) {
-        console.error('No proxies found in the PROXYMESH_URL environment variable.');
+        console.error('No valid proxies found in PROXYMESH_URL.');
         return;
     }
 
     // Select a random proxy from the list
     const proxyUrl = proxyUrls[Math.floor(Math.random() * proxyUrls.length)];
 
-    // Chrome options for headless mode and optimized performance
+    // Configure Chrome options for headless mode
     const options = new chrome.Options();
-    options.setChromeBinaryPath(process.env.CHROME_BINARY_PATH);
+    options.setChromeBinaryPath(CHROME_PATH);
     options.addArguments(
-        '--headless', 
-        '--disable-gpu', 
-        '--no-sandbox', 
-        '--disable-dev-shm-usage'
+        '--headless',
+        '--disable-gpu',
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
+        '--window-size=1920,1080'
     );
-    options.setChromeBinaryPath(chromePath);
-    // Build the WebDriver with proxy configuration
-    const driver = await new Builder()
-        .forBrowser('chrome')
-        .setProxy(proxy.manual({
-            http: proxyUrl,
-            https: proxyUrl,
-        }))
-        .setChromeOptions(options)
-        .build();
 
+    // Build the WebDriver with proxy configuration
+    let driver;
     try {
+        console.log(`Using proxy: ${proxyUrl}`);
+        driver = await new Builder()
+            .forBrowser('chrome')
+            .setProxy(proxy.manual({
+                http: proxyUrl,
+                https: proxyUrl,
+            }))
+            .setChromeOptions(options)
+            .build();
+
         // Step 1: Navigate to Twitter login page
         console.log('Navigating to Twitter login page...');
         await driver.get('https://x.com/i/flow/login');
 
-        // Step 2: Enter Username
+        // Step 2: Enter username
         console.log('Entering username...');
         await driver.wait(until.elementLocated(By.name('text')), 10000);
         const usernameInput = await driver.findElement(By.name('text'));
-        await usernameInput.sendKeys(process.env.TWITTER_USERNAME, Key.RETURN);
+        await usernameInput.sendKeys(TWITTER_USERNAME, Key.RETURN);
 
-        // Step 3: Handle Password or Username Prompt
+        // Step 3: Handle password or second username prompt
         console.log('Handling password or second username prompt...');
         await driver.wait(
             until.elementLocated(By.css('input[name="password"], input[name="text"]')),
@@ -59,16 +79,16 @@ async function fetchTrends() {
         if (passwordField.length > 0) {
             // Enter Password
             const passwordInput = passwordField[0];
-            await passwordInput.sendKeys(process.env.TWITTER_PASSWORD, Key.RETURN);
+            await passwordInput.sendKeys(TWITTER_PASSWORD, Key.RETURN);
         } else {
             // Enter Username Again
             const secondUsernameInput = await driver.findElement(By.name('text'));
-            await secondUsernameInput.sendKeys(process.env.TWITTER_USERNAME, Key.RETURN);
+            await secondUsernameInput.sendKeys(TWITTER_USERNAME, Key.RETURN);
 
             // Wait for Password Input
             await driver.wait(until.elementLocated(By.name('password')), 10000);
             const passwordInput = await driver.findElement(By.name('password'));
-            await passwordInput.sendKeys(process.env.TWITTER_PASSWORD, Key.RETURN);
+            await passwordInput.sendKeys(TWITTER_PASSWORD, Key.RETURN);
         }
 
         // Step 4: Wait for the homepage to load
@@ -102,7 +122,7 @@ async function fetchTrends() {
             console.warn('No trends found! There might be an issue with the page structure.');
         }
 
-        // Step 7: Get Public IP Address
+        // Step 7: Get public IP address
         console.log('Fetching public IP address...');
         const ipResponse = await axios.get('https://httpbin.org/ip');
         const ipAddress = ipResponse.data.origin || 'Unknown';
@@ -115,15 +135,17 @@ async function fetchTrends() {
             ipAddress: ipAddress,
         };
     } catch (error) {
-        console.error('Error fetching trends:', error);
+        console.error('Error fetching trends:', error.message);
         return {
             error: error.message,
             proxyUsed: proxyUrl,
             timestamp: new Date(),
         };
     } finally {
-        console.log('Closing the browser...');
-        await driver.quit();
+        if (driver) {
+            console.log('Closing the browser...');
+            await driver.quit();
+        }
     }
 }
 

@@ -7,6 +7,14 @@ echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sud
 sudo apt-get update
 sudo apt-get install -y google-chrome-stable
 
+# Verify Chrome installation
+if [ -f /usr/bin/google-chrome ]; then
+  echo "Google Chrome installed successfully at /usr/bin/google-chrome"
+else
+  echo "Google Chrome installation failed!"
+  exit 1
+fi
+
 # Install ChromeDriver
 echo "Installing ChromeDriver..."
 CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
@@ -16,4 +24,12 @@ sudo mv chromedriver /usr/local/bin/chromedriver
 sudo chmod +x /usr/local/bin/chromedriver
 rm chromedriver_linux64.zip
 
-echo "Chrome and ChromeDriver installed successfully!"
+# Verify ChromeDriver installation
+if [ -f /usr/local/bin/chromedriver ]; then
+  echo "ChromeDriver installed successfully at /usr/local/bin/chromedriver"
+else
+  echo "ChromeDriver installation failed!"
+  exit 1
+fi
+
+echo "All dependencies installed successfully!"
