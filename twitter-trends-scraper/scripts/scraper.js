@@ -36,7 +36,7 @@ async function fetchTrends() {
 
     // Configure Chrome options for headless mode
     const options = new chrome.Options();
-    options.setChromeBinaryPath(CHROME_PATH);
+    options.setChromeBinaryPath(process.env.CHROME_BINARY_PATH || '/usr/bin/google-chrome');
     options.addArguments(
         '--headless',
         '--disable-gpu',
