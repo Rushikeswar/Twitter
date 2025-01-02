@@ -66,8 +66,4 @@
 //     }
 // });
 
-<<<<<<< HEAD
 // app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-=======
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
->>>>>>> 34afa1c8a205f5673659b45ef15bb1fafa934746
